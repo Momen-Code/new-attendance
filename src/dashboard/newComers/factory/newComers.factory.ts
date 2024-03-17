@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateNewComersDto } from '../dto/create-newComers.dto';
+import { UpdateNewComersDto } from '../dto/update-newComers.dto';
 import { NewComers } from '../entities/newComers.entity';
 
 @Injectable()
@@ -15,18 +16,14 @@ export class NewComersFactoryService {
     return newNewComers;
   }
 
-  // updateNewComers(updateNewComersDto: UpdateNewComersDto) {
-  //   const newNewComers = new NewComers();
+  async updateNewNewComer(updateNewComersDto: UpdateNewComersDto) {
+    const updatedNewComer = new NewComers();
 
-  //   newNewComers.email = updateNewComersDto.email && updateNewComersDto.email;
-  //   newNewComers.countryCode =
-  //     updateNewComersDto.countryCode && updateNewComersDto.countryCode;
-  //   newNewComers.phoneNumber =
-  //     updateNewComersDto.phoneNumber && updateNewComersDto.phoneNumber;
-  //   newNewComers.gender = updateNewComersDto.gender && updateNewComersDto.gender;
-  //   newNewComers.dateOfBirth =
-  //     updateNewComersDto.dateOfBirth && updateNewComersDto.dateOfBirth;
+    updatedNewComer.military_number = updateNewComersDto.military_number;
+    updatedNewComer.name = updateNewComersDto.name;
+    updatedNewComer.rank = updateNewComersDto.rank;
+    updatedNewComer.detachment = updateNewComersDto.detachment;
 
-  //   return newNewComers;
-  // }
+    return updatedNewComer;
+  }
 }

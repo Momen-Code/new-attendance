@@ -5,8 +5,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import * as _ from 'lodash';
-import { FindAllQuery } from 'src/common/dto/findall-query.dto';
 import { NewComers, NewComersRepository } from 'src/models';
+import { FindAllQueryDto } from './dto/find-all-query.dto.ts.dto';
 
 @Injectable()
 export class NewComersService {
@@ -31,9 +31,48 @@ export class NewComersService {
     }
   }
 
-  public async findAll(query: FindAllQuery) {
+  public async createBulk(data: any) {
     try {
-      return this.newComersRepository.getAll({}, query);
+      await this.newComersRepository.model.insertMany(data);
+      return true;
+    } catch (error) {
+      this.logger.error('--Error--', error);
+      throw error;
+    }
+  }
+
+  public async findAll(query: FindAllQueryDto) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { limit, skip, sort, order, paginate, ...rest } = query || {};
+    const match = {};
+
+    if (query.military_number) {
+      Object.assign(match, {
+        military_number: query.military_number,
+      });
+    }
+    if (query.name) {
+      Object.assign(match, {
+        name: {
+          $in: query.name.split(' ').map((s) => new RegExp(s, 'i')),
+        },
+      });
+    }
+    if (query.status) {
+      Object.assign(match, {
+        status: query.status,
+      });
+    }
+    if (query.detachment) {
+      Object.assign(match, {
+        detachment: query.detachment,
+      });
+    }
+    try {
+      return this.newComersRepository.getAll(
+        { ...match, is_deleted: false },
+        query,
+      );
     } catch (error) {
       throw error;
     }
@@ -44,6 +83,36 @@ export class NewComersService {
       return this.newComersRepository.getOne({
         military_number,
       });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  public async update(id: string, updatedNewComer: NewComers) {
+    try {
+      return this.newComersRepository.update(
+        { military_number: id },
+        updatedNewComer,
+        {
+          new: true,
+          lean: true,
+        },
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  public async delete(id: string) {
+    try {
+      return this.newComersRepository.update(
+        { _id: id },
+        { is_deleted: true },
+        {
+          new: true,
+          lean: true,
+        },
+      );
     } catch (error) {
       throw error;
     }

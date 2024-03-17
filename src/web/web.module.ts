@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
-import { AdminJwtAuth } from 'src/common/guards/admin-auth.guard';
-import { NewComersModule } from './newComers/newComers.module';
 import { AttendanceModule } from './attendance/attendance.module';
+import { NewComersModule } from './newComers/newComers.module';
+import { OfficersModule } from './officers/officers.module';
+import { SoldierModule } from './soldiers/soldiers.module';
 
 @Module({
-  imports: [NewComersModule, AttendanceModule],
+  imports: [NewComersModule, AttendanceModule, SoldierModule, OfficersModule],
   providers: [],
 })
 export class WebModule {}

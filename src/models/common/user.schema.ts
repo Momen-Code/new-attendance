@@ -34,7 +34,7 @@ export class User {
   @Prop({ type: String })
   last_update_time?: string;
 
-  @Prop({ type: Boolean, default: true })
+  @Prop({ type: Boolean, default: false })
   is_deleted?: boolean;
 
   @Prop({ type: Boolean, default: true })

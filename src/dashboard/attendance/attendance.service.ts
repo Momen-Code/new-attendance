@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { FindAllQuery } from 'src/common/dto/findall-query.dto';
 import { Attendance, AttendanceRepository } from 'src/models';
+import { genMatch } from '../../common/helper/match-query.helper';
+import { FindAllQueryDto } from './dto/find-all-query.dto';
 
 @Injectable()
 export class AttendanceService {
@@ -20,9 +21,9 @@ export class AttendanceService {
     }
   }
 
-  public async findAll(query: FindAllQuery) {
+  public async findAll(query: FindAllQueryDto) {
     const { limit, skip, sort, order, paginate, ...rest } = query || {};
-
+    const match = genMatch(rest);
     try {
       return this.requestRepository.aggregate(
         [
@@ -35,6 +36,9 @@ export class AttendanceService {
             },
           },
           { $unwind: '$user' },
+          {
+            $match: match,
+          },
           {
             $project: {
               _id: 1,

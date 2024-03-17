@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsMongoId, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsMongoId, IsOptional, IsString } from 'class-validator';
 import { Types } from 'mongoose';
 
 export class CreateAttendanceDto {
@@ -10,4 +10,9 @@ export class CreateAttendanceDto {
   @ApiProperty()
   @IsString()
   status: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  type?: string;
 }

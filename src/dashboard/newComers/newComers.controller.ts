@@ -1,17 +1,35 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import {
   CreateResponse,
   FindAllResponse,
   FindOneResponse,
+  RemoveResponse,
+  UpdateResponse,
 } from 'src/common/dto/response.dto';
 import { NewComers } from 'src/models';
 import { swagger } from '../../common/constants/swagger.constant';
 import { CreateNewComersDto } from './dto/create-newComers.dto';
+
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as xlsx from 'xlsx';
+import { FindAllQueryDto } from './dto/find-all-query.dto.ts.dto';
+import { UpdateNewComersDto } from './dto/update-newComers.dto';
 import { NewComersFactoryService } from './factory/newComers.factory';
 import { NewComersService } from './newComers.service';
-import { FindAllQuery } from 'src/common/dto/findall-query.dto';
 
 @Controller('dashboard/newComers')
 @ApiTags(swagger.DashboardNewComers)
@@ -41,36 +59,102 @@ export class NewComersController {
     return createNewComersResponse;
   }
 
-  @Get()
+  @Post('bulk')
   @ApiBearerAuth()
-  async getAll(@Query() query: FindAllQuery) {
-    const getAllNewComersRepsonse = new FindAllResponse();
+  @UseInterceptors(FileInterceptor('file'))
+  async registerBulk(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
     try {
-      const newComers = await this.newComersService.findAll(query);
-      getAllNewComersRepsonse.success = true;
-      getAllNewComersRepsonse.data = newComers.data;
-      getAllNewComersRepsonse.currentPage = newComers.currentPage;
-      getAllNewComersRepsonse.numberOfPages = newComers.numberOfPages;
-      getAllNewComersRepsonse.numberOfRecords = newComers.numberOfRecords;
+      const workbook = xlsx.read(file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const jsonData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+      console.log(jsonData);
+
+      // Assuming your service method expects data to be inserted
+      const res = await this.newComersService.createBulk(jsonData);
+
+      if (!res) {
+        throw new BadRequestException('Error while adding bulk users');
+      }
+
+      return { message: 'Data inserted successfully' };
     } catch (error) {
-      getAllNewComersRepsonse.success = false;
       throw error;
     }
-    return getAllNewComersRepsonse;
   }
 
-  @Get('find')
+  @Get()
   @ApiBearerAuth()
-  async getOne(@Param('military_number') military_number: string) {
-    const getAllNewComersRepsonse = new FindOneResponse();
+  async getAll(@Query() query: FindAllQueryDto) {
+    const getAllNewComersResponse = new FindAllResponse();
     try {
-      const newComers = await this.newComersService.findOne(military_number);
-      getAllNewComersRepsonse.success = true;
-      getAllNewComersRepsonse.data = newComers;
+      const newComers = await this.newComersService.findAll(query);
+      getAllNewComersResponse.success = true;
+      getAllNewComersResponse.data = newComers.data;
+      getAllNewComersResponse.currentPage = newComers.currentPage;
+      getAllNewComersResponse.numberOfPages = newComers.numberOfPages;
+      getAllNewComersResponse.numberOfRecords = newComers.numberOfRecords;
     } catch (error) {
-      getAllNewComersRepsonse.success = false;
+      getAllNewComersResponse.success = false;
       throw error;
     }
-    return getAllNewComersRepsonse;
+    return getAllNewComersResponse;
+  }
+
+  @Get(':military_number')
+  @ApiBearerAuth()
+  async getOne(@Param('military_number') military_number: string) {
+    const getAllNewComersResponse = new FindOneResponse();
+    try {
+      const newComers = await this.newComersService.findOne(military_number);
+      console.log(newComers);
+      getAllNewComersResponse.success = true;
+      getAllNewComersResponse.data = newComers;
+    } catch (error) {
+      getAllNewComersResponse.success = false;
+      throw error;
+    }
+    return getAllNewComersResponse;
+  }
+
+  @Patch(':id')
+  @ApiBearerAuth()
+  async update(
+    @Param('id') id: string,
+    @Body() updateNewComersDto: UpdateNewComersDto,
+  ) {
+    const updateNewComersResponse = new UpdateResponse();
+    try {
+      const updateNewComer =
+        await this.newComersFactoryService.updateNewNewComer(
+          updateNewComersDto,
+        );
+      const newComers = await this.newComersService.update(id, updateNewComer);
+      updateNewComersResponse.success = true;
+      updateNewComersResponse.data = newComers;
+    } catch (error) {
+      updateNewComersResponse.success = false;
+      throw error;
+    }
+    return updateNewComersResponse;
+  }
+
+  @Delete(':id')
+  @ApiBearerAuth()
+  async delete(@Param('id') id: string) {
+    const deleteNewComerResponse = new RemoveResponse();
+    try {
+      const deletedNewComer = await this.newComersService.delete(id);
+      if (deletedNewComer) {
+        deleteNewComerResponse.success = true;
+      }
+    } catch (error) {
+      deleteNewComerResponse.success = false;
+      throw error;
+    }
   }
 }

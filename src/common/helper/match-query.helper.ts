@@ -1,5 +1,3 @@
-import mongoose from 'mongoose';
-
 export function genMatch(query) {
   const match = {};
 
@@ -11,20 +9,38 @@ export function genMatch(query) {
     });
   }
 
-  if (query.categories || query.category) {
-    const categories = query.categories ?? [query.category];
+  if (query.status) {
     Object.assign(match, {
-      category: {
-        $in: categories.map((id: string) => new mongoose.Types.ObjectId(id)),
+      status: query.status,
+    });
+  }
+
+  if (query.date) {
+    const startDate = new Date(query.date); // Start of the specified day
+    startDate.setHours(0, 0, 0, 0); // Set time to start of day (midnight)
+
+    const endDate = new Date(query.date); // End of the specified day
+    endDate.setHours(23, 59, 59, 999); // Set time to end of day (just before midnight)
+
+    console.log(query.date);
+    Object.assign(match, {
+      updatedAt: {
+        $gte: startDate,
+        $lte: endDate,
       },
     });
   }
 
-  if (query.brand) {
-    const brand = [query.brand];
+  if (query.military_number) {
     Object.assign(match, {
-      brand: {
-        $in: brand.map((id: string) => new mongoose.Types.ObjectId(id)),
+      'user.military_number': query.military_number,
+    });
+  }
+
+  if (query.name) {
+    Object.assign(match, {
+      'user.name': {
+        $in: query.name.split(' ').map((s) => new RegExp(s, 'i')),
       },
     });
   }

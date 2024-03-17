@@ -7,6 +7,12 @@ import {
   NewComers,
   NewComersRepository,
   NewComersSchema,
+  Officers,
+  OfficersRepository,
+  OfficersSchema,
+  Soldier,
+  SoldierRepository,
+  SoldierSchema,
 } from 'src/models';
 import { User, UserSchema } from 'src/models/common/user.schema';
 
@@ -19,11 +25,23 @@ import { User, UserSchema } from 'src/models/common/user.schema';
         discriminators: [
           { name: Admin.name, schema: AdminSchema },
           { name: NewComers.name, schema: NewComersSchema },
+          { name: Soldier.name, schema: SoldierSchema },
+          { name: Officers.name, schema: OfficersSchema },
         ],
       },
     ]),
   ],
-  providers: [AdminRepository, NewComersRepository],
-  exports: [AdminRepository, NewComersRepository],
+  providers: [
+    AdminRepository,
+    NewComersRepository,
+    SoldierRepository,
+    OfficersRepository,
+  ],
+  exports: [
+    AdminRepository,
+    NewComersRepository,
+    SoldierRepository,
+    OfficersRepository,
+  ],
 })
 export class UserModule {}
