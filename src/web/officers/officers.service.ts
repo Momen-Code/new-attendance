@@ -49,7 +49,7 @@ export class OfficersService {
         {
           _id: new Types.ObjectId(_id),
         },
-        { status },
+        { status, updatedAt: Date.now() },
         { new: true, lean: true },
       );
     } catch (error) {

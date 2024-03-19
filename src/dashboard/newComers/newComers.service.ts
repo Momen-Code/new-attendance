@@ -43,7 +43,7 @@ export class NewComersService {
 
   public async findAll(query: FindAllQueryDto) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { limit, skip, sort, order, paginate, ...rest } = query || {};
+    const { limit, skip, sort, order, ...rest } = query || {};
     const match = {};
 
     if (query.military_number) {
@@ -71,7 +71,7 @@ export class NewComersService {
     try {
       return this.newComersRepository.getAll(
         { ...match, is_deleted: false },
-        query,
+        { ...query, paginate: false },
       );
     } catch (error) {
       throw error;

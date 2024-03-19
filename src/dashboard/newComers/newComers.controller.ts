@@ -94,10 +94,10 @@ export class NewComersController {
     try {
       const newComers = await this.newComersService.findAll(query);
       getAllNewComersResponse.success = true;
-      getAllNewComersResponse.data = newComers.data;
-      getAllNewComersResponse.currentPage = newComers.currentPage;
-      getAllNewComersResponse.numberOfPages = newComers.numberOfPages;
-      getAllNewComersResponse.numberOfRecords = newComers.numberOfRecords;
+      getAllNewComersResponse.data = newComers;
+      // getAllNewComersResponse.currentPage = newComers.currentPage;
+      // getAllNewComersResponse.numberOfPages = newComers.numberOfPages;
+      // getAllNewComersResponse.numberOfRecords = newComers.numberOfRecords;
     } catch (error) {
       getAllNewComersResponse.success = false;
       throw error;

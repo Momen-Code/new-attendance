@@ -54,7 +54,7 @@ export class AttendanceService {
             },
           },
         ],
-        { limit, skip, paginate, sort, order },
+        { limit, skip, paginate, sort },
       );
     } catch (error) {
       throw error;
