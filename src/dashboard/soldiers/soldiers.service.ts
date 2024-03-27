@@ -31,6 +31,16 @@ export class SoldierService {
     }
   }
 
+  public async createBulk(data: any) {
+    try {
+      await this.soldiersRepository.model.insertMany(data);
+      return true;
+    } catch (error) {
+      this.logger.error('--Error--', error);
+      throw error;
+    }
+  }
+
   public async findAll(query: FindAllQueryDto) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { limit, skip, sort, order, paginate, ...rest } = query || {};
@@ -78,6 +88,21 @@ export class SoldierService {
       return this.soldiersRepository.update(
         { military_number: id },
         updatedNewComer,
+        {
+          new: true,
+          lean: true,
+        },
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  public async updateBulkStatus(status: string) {
+    try {
+      return this.soldiersRepository.model.updateMany(
+        { status },
+        { status: status === 'in' ? 'out' : 'in' },
         {
           new: true,
           lean: true,

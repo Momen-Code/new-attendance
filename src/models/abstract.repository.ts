@@ -71,9 +71,6 @@ export abstract class AbstractRepository<T> {
 
     let result = await nResult.exec();
 
-    console.log(paginate);
-    console.log('asdasd', result.length);
-
     if (paginate) {
       const count = isEmpty(query)
         ? await this.model.collection.countDocuments({})

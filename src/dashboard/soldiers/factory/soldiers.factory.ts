@@ -21,6 +21,7 @@ export class SoldierFactoryService {
     updatedNewComer.military_number = updateSoldierDto.military_number;
     updatedNewComer.name = updateSoldierDto.name;
     updatedNewComer.rank = updateSoldierDto.rank;
+    updatedNewComer.status = updateSoldierDto.status;
 
     return updatedNewComer;
   }

@@ -34,12 +34,12 @@ export class OfficersController {
     return createOfficersResponse;
   }
 
-  @Get(':name')
+  @Get(':identifier')
   @Public()
-  async getOne(@Param('name') name: string) {
+  async getOne(@Param('identifier') identifier: string) {
     const getAllOfficersResponse = new FindOneResponse();
     try {
-      const officers = await this.officersService.findOne(name);
+      const officers = await this.officersService.findOne(identifier);
 
       getAllOfficersResponse.success = true;
       getAllOfficersResponse.data = officers;

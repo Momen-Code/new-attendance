@@ -23,6 +23,7 @@ export class NewComersFactoryService {
     updatedNewComer.name = updateNewComersDto.name;
     updatedNewComer.rank = updateNewComersDto.rank;
     updatedNewComer.detachment = updateNewComersDto.detachment;
+    updatedNewComer.status = updateNewComersDto.status;
 
     return updatedNewComer;
   }

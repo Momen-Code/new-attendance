@@ -103,6 +103,21 @@ export class NewComersService {
     }
   }
 
+  public async updateBulkStatus(status: string) {
+    try {
+      return this.newComersRepository.model.updateMany(
+        { status },
+        { status: status === 'in' ? 'out' : 'in' },
+        {
+          new: true,
+          lean: true,
+        },
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
   public async delete(id: string) {
     try {
       return this.newComersRepository.update(

@@ -72,8 +72,6 @@ export class NewComersController {
       const sheetName = workbook.SheetNames[0];
       const jsonData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-      console.log(jsonData);
-
       // Assuming your service method expects data to be inserted
       const res = await this.newComersService.createBulk(jsonData);
 
@@ -111,7 +109,7 @@ export class NewComersController {
     const getAllNewComersResponse = new FindOneResponse();
     try {
       const newComers = await this.newComersService.findOne(military_number);
-      console.log(newComers);
+
       getAllNewComersResponse.success = true;
       getAllNewComersResponse.data = newComers;
     } catch (error) {
@@ -134,6 +132,21 @@ export class NewComersController {
           updateNewComersDto,
         );
       const newComers = await this.newComersService.update(id, updateNewComer);
+      updateNewComersResponse.success = true;
+      updateNewComersResponse.data = newComers;
+    } catch (error) {
+      updateNewComersResponse.success = false;
+      throw error;
+    }
+    return updateNewComersResponse;
+  }
+
+  @Patch('bulk-status/:status')
+  @ApiBearerAuth()
+  async updateBulkStatus(@Param('status') status: string) {
+    const updateNewComersResponse = new UpdateResponse();
+    try {
+      const newComers = await this.newComersService.updateBulkStatus(status);
       updateNewComersResponse.success = true;
       updateNewComersResponse.data = newComers;
     } catch (error) {

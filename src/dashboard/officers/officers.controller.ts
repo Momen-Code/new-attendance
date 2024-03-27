@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -7,7 +8,10 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import {
@@ -17,6 +21,7 @@ import {
   RemoveResponse,
   UpdateResponse,
 } from 'src/common/dto/response.dto';
+import * as xlsx from 'xlsx';
 import { swagger } from '../../common/constants/swagger.constant';
 import { Officers } from '../../models';
 import { CreateOfficersDto } from './dto/create-officers.dto';
@@ -51,6 +56,32 @@ export class OfficersController {
     return createOfficersResponse;
   }
 
+  @Post('bulk')
+  @ApiBearerAuth()
+  @UseInterceptors(FileInterceptor('file'))
+  async registerBulk(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    try {
+      const workbook = xlsx.read(file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const jsonData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+      // Assuming your service method expects data to be inserted
+      const res = await this.officersService.createBulk(jsonData);
+
+      if (!res) {
+        throw new BadRequestException('Error while adding bulk users');
+      }
+
+      return { message: 'Data inserted successfully' };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Get()
   @ApiBearerAuth()
   async getAll(@Query() query: FindAllQueryDto) {
@@ -75,7 +106,7 @@ export class OfficersController {
     const getAllOfficersResponse = new FindOneResponse();
     try {
       const officers = await this.officersService.findOne(military_number);
-      console.log(officers);
+
       getAllOfficersResponse.success = true;
       getAllOfficersResponse.data = officers;
     } catch (error) {
@@ -96,6 +127,21 @@ export class OfficersController {
       const updateNewComer =
         await this.officersFactoryService.updateNewNewComer(updateOfficersDto);
       const officers = await this.officersService.update(id, updateNewComer);
+      updateOfficersResponse.success = true;
+      updateOfficersResponse.data = officers;
+    } catch (error) {
+      updateOfficersResponse.success = false;
+      throw error;
+    }
+    return updateOfficersResponse;
+  }
+
+  @Patch('bulk-status/:status')
+  @ApiBearerAuth()
+  async updateBulkStatus(@Param('status') status: string) {
+    const updateOfficersResponse = new UpdateResponse();
+    try {
+      const officers = await this.officersService.updateBulkStatus(status);
       updateOfficersResponse.success = true;
       updateOfficersResponse.data = officers;
     } catch (error) {

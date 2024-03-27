@@ -31,12 +31,17 @@ export class OfficersService {
     }
   }
 
-  public async findOne(name: string) {
+  public async findOne(identifier: string) {
     try {
       return this.officersRepository.getOne({
-        name: {
-          $in: name.split(' ').map((s) => new RegExp(s, 'i')),
-        },
+        $or: [
+          {
+            name: {
+              $in: identifier.split(' ').map((s) => new RegExp(s, 'i')),
+            },
+          },
+          { military_number: identifier },
+        ],
       });
     } catch (error) {
       throw error;

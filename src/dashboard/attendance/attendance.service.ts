@@ -22,7 +22,7 @@ export class AttendanceService {
   }
 
   public async findAll(query: FindAllQueryDto) {
-    const { limit, skip, sort, order, paginate, ...rest } = query || {};
+    const { limit, skip, sort, paginate, ...rest } = query || {};
     const match = genMatch(rest);
     try {
       return this.requestRepository.aggregate(
