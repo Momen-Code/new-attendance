@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsOptional, IsString } from 'class-validator';
 import { FindAllQuery } from '../../../common/dto/findall-query.dto';
 
 export class FindAllQueryDto extends FindAllQuery {
@@ -22,4 +22,14 @@ export class FindAllQueryDto extends FindAllQuery {
   @IsString()
   @IsOptional()
   detachment?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  date?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  arrive_on?: string;
 }

@@ -106,7 +106,6 @@ export class SoldierController {
     const getAllSoldierResponse = new FindOneResponse();
     try {
       const soldier = await this.soldierService.findOne(military_number);
-
       getAllSoldierResponse.success = true;
       getAllSoldierResponse.data = soldier;
     } catch (error) {

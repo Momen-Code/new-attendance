@@ -22,7 +22,6 @@ export function genMatch(query) {
     const endDate = new Date(query.date); // End of the specified day
     endDate.setHours(23, 59, 59, 999); // Set time to end of day (just before midnight)
 
-    console.log(query.date);
     Object.assign(match, {
       updatedAt: {
         $gte: startDate,

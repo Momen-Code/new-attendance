@@ -92,15 +92,33 @@ export class NewComersController {
     try {
       const newComers = await this.newComersService.findAll(query);
       getAllNewComersResponse.success = true;
-      getAllNewComersResponse.data = newComers;
-      // getAllNewComersResponse.currentPage = newComers.currentPage;
-      // getAllNewComersResponse.numberOfPages = newComers.numberOfPages;
-      // getAllNewComersResponse.numberOfRecords = newComers.numberOfRecords;
+      getAllNewComersResponse.data = newComers.data;
+      getAllNewComersResponse.currentPage = newComers.currentPage;
+      getAllNewComersResponse.numberOfPages = newComers.numberOfPages;
+      getAllNewComersResponse.numberOfRecords = newComers.numberOfRecords;
     } catch (error) {
       getAllNewComersResponse.success = false;
       throw error;
     }
     return getAllNewComersResponse;
+  }
+
+  @Get('statistics')
+  @ApiBearerAuth()
+  async getStatsitics(@Query() query: FindAllQueryDto) {
+    const getStatsiticsResponse = new FindOneResponse();
+    try {
+      const statistics = await this.newComersService.findStatistics(query);
+      getStatsiticsResponse.success = true;
+      getStatsiticsResponse.data = statistics;
+      // getStatsiticsResponse.currentPage = newComers.currentPage;
+      // getStatsiticsResponse.numberOfPages = newComers.numberOfPages;
+      // getStatsiticsResponse.numberOfRecords = newComers.numberOfRecords;
+    } catch (error) {
+      getStatsiticsResponse.success = false;
+      throw error;
+    }
+    return getStatsiticsResponse;
   }
 
   @Get(':military_number')
@@ -109,7 +127,6 @@ export class NewComersController {
     const getAllNewComersResponse = new FindOneResponse();
     try {
       const newComers = await this.newComersService.findOne(military_number);
-
       getAllNewComersResponse.success = true;
       getAllNewComersResponse.data = newComers;
     } catch (error) {

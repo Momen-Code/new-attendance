@@ -37,8 +37,6 @@ export class NewComersService {
         military_number,
       });
 
-      console.log(newComer);
-
       return newComer;
     } catch (error) {
       throw error;

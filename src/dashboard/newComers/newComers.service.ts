@@ -51,6 +51,11 @@ export class NewComersService {
         military_number: query.military_number,
       });
     }
+    if (query.arrive_on) {
+      Object.assign(match, {
+        arrive_on: +query.arrive_on,
+      });
+    }
     if (query.name) {
       Object.assign(match, {
         name: {
@@ -71,7 +76,7 @@ export class NewComersService {
     try {
       return this.newComersRepository.getAll(
         { ...match, is_deleted: false },
-        { ...query, paginate: false },
+        { ...query, paginate: true },
       );
     } catch (error) {
       throw error;
@@ -128,6 +133,46 @@ export class NewComersService {
           lean: true,
         },
       );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  public async findStatistics(query: FindAllQueryDto) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { limit, skip, sort, order, ...rest } = query || {};
+
+    const match = {};
+
+    if (query.date) {
+      const startDate = new Date(query.date); // Start of the specified day
+      startDate.setHours(0, 0, 0, 0); // Set time to start of day (midnight)
+
+      const endDate = new Date(query.date); // End of the specified day
+      endDate.setHours(23, 59, 59, 999); // Set time to end of day (just before midnight)
+
+      Object.assign(match, {
+        updatedAt: {
+          $gte: startDate,
+          $lte: endDate,
+        },
+      });
+    }
+    try {
+      const inNewComers: any = await this.newComersRepository.getAll(
+        { ...match, is_deleted: false, status: 'in' },
+        { ...query, paginate: false },
+      );
+      const outNewComers: any = await this.newComersRepository.getAll(
+        { ...match, is_deleted: false, status: 'out' },
+        { ...query, paginate: false },
+      );
+
+      return {
+        date: query.date ?? new Date(),
+        total_newComers_in_camp: inNewComers.length,
+        total_newComers_out_camp: outNewComers.length,
+      };
     } catch (error) {
       throw error;
     }
