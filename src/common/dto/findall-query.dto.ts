@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
@@ -22,7 +22,7 @@ export class FindAllQuery {
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  skip?: number = 0;
+  page?: number = 0;
 
   @IsOptional()
   @IsString()
@@ -38,8 +38,14 @@ export class FindAllQuery {
   @IsString()
   search?: string;
 
+  @ApiPropertyOptional({
+    description: 'Request data pagination',
+    type: Boolean,
+    example: true,
+    default: true,
+  })
   @IsOptional()
   @IsBoolean()
-  @Type(() => Boolean)
-  paginate?: boolean = true;
+  @Transform(({ value }) => (value === 'true' ? true : false))
+  paginate?: boolean;
 }

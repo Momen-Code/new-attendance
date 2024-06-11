@@ -25,8 +25,8 @@ export class NewComers {
   @Prop({ type: String })
   last_update_time: string;
 
-  @Prop({ type: Number, default: 1 })
-  arrive_on?: number;
+  @Prop({ type: String, default: '1' })
+  arrive_on?: string;
 
   detachment?: string;
   is_deleted?: boolean;

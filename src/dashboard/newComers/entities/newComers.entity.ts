@@ -10,5 +10,5 @@ export class NewComers {
   detachment?: string;
   is_deleted?: boolean;
   isActive?: boolean;
-  arrive_on?: number;
+  arrive_on?: string;
 }

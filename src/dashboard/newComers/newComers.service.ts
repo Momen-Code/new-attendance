@@ -7,6 +7,7 @@ import {
 import * as _ from 'lodash';
 import { NewComers, NewComersRepository } from 'src/models';
 import { FindAllQueryDto } from './dto/find-all-query.dto.ts.dto';
+import { FindAll } from 'src/common/type';
 
 @Injectable()
 export class NewComersService {
@@ -41,9 +42,9 @@ export class NewComersService {
     }
   }
 
-  public async findAll(query: FindAllQueryDto) {
+  public async findAll(query: FindAllQueryDto): Promise<FindAll<NewComers>> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { limit, skip, sort, order, ...rest } = query || {};
+    const { limit, page, sort, order, ...rest } = query || {};
     const match = {};
 
     if (query.military_number) {
@@ -76,7 +77,7 @@ export class NewComersService {
     try {
       return this.newComersRepository.getAll(
         { ...match, is_deleted: false },
-        { ...query, paginate: true },
+        { ...query, paginate: query.paginate },
       );
     } catch (error) {
       throw error;
@@ -140,7 +141,7 @@ export class NewComersService {
 
   public async findStatistics(query: FindAllQueryDto) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { limit, skip, sort, order, ...rest } = query || {};
+    const { limit, page, sort, order, ...rest } = query || {};
 
     const match = {};
 
