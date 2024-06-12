@@ -3,12 +3,14 @@ import {
   FilterQuery,
   Model,
   PipelineStage,
+  PopulateOptions,
   ProjectionType,
   QueryOptions,
 } from 'mongoose';
 import { isNil, isArray, isEmpty } from 'lodash';
 import { SortOrder } from '../common/constants/sorting.constant';
 import { FindAllQuery } from 'src/common/dto/findall-query.dto';
+import { FindAll } from 'src/common/type';
 
 export abstract class AbstractRepository<T> {
   private repo: Model<T & Document>;
@@ -46,18 +48,13 @@ export abstract class AbstractRepository<T> {
     const newDocument = new this.nModel(item);
     return newDocument.save();
   }
-
-  public async getAll(
+  async getAll(
     query: any,
-    params: FindAllQuery = { limit: 25, skip: 0, paginate: true },
-  ): Promise<{
-    data: T[];
-    currentPage: number;
-    numberOfPages: number;
-    numberOfRecords: number;
-  }> {
-    const { limit = 25, skip = 0, paginate = true, sort, order } = params || {};
+    params: GetAll = { limit: 25, page: 1, paginate: true },
+  ): Promise<FindAll<T>> {
+    const { limit = 25, page = 1, paginate = true, sort, order } = params || {};
 
+    const skip = limit * (page - 1);
     const nResult = this._buildQuery(this.repo.find(query || {}), params);
 
     if (paginate) {
@@ -73,13 +70,13 @@ export abstract class AbstractRepository<T> {
 
     if (paginate) {
       const count = isEmpty(query)
-        ? await this.model.collection.countDocuments({})
-        : await this.model.countDocuments(query);
+        ? await this.repo.collection.countDocuments({})
+        : await this.repo.countDocuments(query);
 
       const pages = Math.ceil(count / limit) || 1;
       result = {
         data: result,
-        currentPage: skip === 0 ? 1 : limit / skip + 1,
+        currentPage: skip === 0 ? 1 : Math.ceil(limit / skip + 1),
         numberOfPages: pages,
         numberOfRecords: count,
       };
@@ -108,59 +105,70 @@ export abstract class AbstractRepository<T> {
   public async aggregate(
     pipeline: PipelineStage[],
     params?: {
-      limit?: number;
-      skip?: number;
-      paginate?: boolean;
-      sort?: string;
-      order?: string;
+      limit: number;
+      page: number;
+      paginate: boolean;
+      sort: string;
+      order: number;
     },
-  ): Promise<any> {
-    const { limit = 10, skip = 0, paginate, sort, order } = params ?? {};
+  ) {
+    const { limit = 10, page = 1, paginate = true, sort, order } = params || {};
+    const skip = limit * (page - 1);
+    const sortValue: Record<string, any> = {};
 
-    const sortValue =
-      sort && order
-        ? { [sort]: order === SortOrder.ASCENDING ? 1 : -1 }
-        : ({ createdAt: -1 } as any);
-
-    const countPipeline = paginate
-      ? [...pipeline, { $count: 'count' }]
-      : pipeline;
-    const [countResult, aggregationResult] = await Promise.all([
-      this.model.aggregate(countPipeline).exec(),
-      this.model
-        .aggregate([
-          ...pipeline,
-          {
-            $facet: {
-              [this.model.collection.name]: [
-                { $skip: skip },
-                { $limit: limit },
-                { $sort: sortValue },
-              ],
-            },
-          },
-        ])
-        .exec(),
-    ]);
-    const count = countResult?.shift()?.count ?? 0;
-
-    const pages = Math.ceil(count / limit);
-
-    const result: {
-      data: any[];
-      numberOfRecords?: number;
-      numberOfPages?: number;
-      currentPage?: number;
-    } = {
-      data: aggregationResult?.shift()?.[this.model.collection.name] ?? [],
-    };
-
-    if (paginate) {
-      result.numberOfRecords = count;
-      result.numberOfPages = pages;
-      result.currentPage = skip === 0 ? 1 : Math.ceil(skip / limit + 1);
+    if (sort && order) {
+      const pattern = /^[A-Z_]+$/;
+      if (pattern.test(sort)) {
+        const sortKeyArray = sort.toLowerCase().split('_');
+        for (let i = 1; i < sortKeyArray.length; i++) {
+          sortKeyArray[i] =
+            sortKeyArray[i].charAt(0).toUpperCase() + sortKeyArray[i].slice(1);
+        }
+        const sortKey = sortKeyArray.join('');
+        sortValue[sortKey] = order;
+      }
     }
 
-    return result;
+    if (paginate) {
+      pipeline.push({ $skip: skip }, { $limit: limit });
+    }
+
+    const [a, b] = await Promise.all([
+      this.repo
+        .aggregate([
+          {
+            $sort: isEmpty(sortValue) ? { createdAt: -1 } : sortValue,
+          },
+          ...pipeline,
+        ])
+        .exec(),
+      this.repo.aggregate([...pipeline, { $count: 'count' }]).exec(),
+    ]);
+
+    const data: T[] = a;
+    const [countResult] = b;
+
+    return {
+      currentPage: skip === 0 ? 1 : Math.ceil(skip / limit + 1),
+      data,
+      numberOfPages: Math.ceil(countResult?.count / limit) || 1,
+      numberOfRecords: countResult?.count || 0,
+    };
   }
+}
+
+type GetAll = {
+  limit?: number;
+  page?: number;
+  paginate?: boolean;
+  sort?: string;
+  order?: Order;
+  fields?: string;
+  lean?: boolean;
+  populate?: PopulateOptions | (string | PopulateOptions)[];
+};
+
+enum Order {
+  'ascending' = 1,
+  'descending' = -1,
 }

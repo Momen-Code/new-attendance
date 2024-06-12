@@ -43,7 +43,7 @@ export class SoldierService {
 
   public async findAll(query: FindAllQueryDto) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { limit, skip, sort, order, paginate, ...rest } = query || {};
+    const { limit, page, sort, order, paginate, ...rest } = query || {};
     const match = {};
 
     if (query.military_number) {

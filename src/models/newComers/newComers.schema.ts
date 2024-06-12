@@ -16,7 +16,7 @@ export class NewComers {
   @Prop({ type: String, required: true })
   name: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, default: 'out' })
   status: string;
 
   @Prop({ type: String, required: true, default: 'جندي' })
@@ -24,6 +24,9 @@ export class NewComers {
 
   @Prop({ type: String })
   last_update_time: string;
+
+  @Prop({ type: String, default: '1' })
+  arrive_on?: string;
 
   detachment?: string;
   is_deleted?: boolean;

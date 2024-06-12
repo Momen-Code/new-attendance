@@ -40,7 +40,6 @@ export class SoldierController {
     const getAllSoldierResponse = new FindOneResponse();
     try {
       const soldier = await this.soldierService.findOne(military_number);
-      console.log(soldier);
       getAllSoldierResponse.success = true;
       getAllSoldierResponse.data = soldier;
     } catch (error) {
